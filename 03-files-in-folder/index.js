@@ -1,5 +1,4 @@
 const { join, extname, basename } = require('path');
-const { stdout } = require('process');
 const { readdir, stat } = require('fs/promises');
 
 const folderPath = join(__dirname, 'secret-folder');
@@ -15,11 +14,11 @@ const readFiles = async () => {
           console.log(`${basename(filePath, extname(filePath))} - ${extname(filePath)} - ${stats.size}b`);
         }
       } catch (err) {
-        stdout.write('Read file operation failed\n');
+        console.error(err.message);
       }
     });
   } catch (err) {
-    stdout.write('Read files operation failed\n');
+    console.error(err.message);
   }
 };
 
