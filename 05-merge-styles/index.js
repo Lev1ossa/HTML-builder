@@ -1,6 +1,7 @@
 const { join, extname } = require('path');
 const { readdir, stat } = require('fs/promises');
-const {createReadStream, createWriteStream} = require('fs');
+const { createReadStream, createWriteStream } = require('fs');
+const { EOL } = require('os');
 
 const stylesFolderPath = join(__dirname, 'styles');
 const bundlePath = join(__dirname, 'project-dist', 'bundle.css');
@@ -16,7 +17,9 @@ const createBundle = async () => {
         const stats = await stat(styleFilePath);
         if(stats.isFile() && extname(styleFilePath) === '.css'){
           const readStream = createReadStream(styleFilePath);
-          readStream.pipe(writeStream);
+          readStream.on('data', data => {
+            writeStream.write(`${data}${EOL}`);
+          })
         }
       } catch (err) {
         console.error(err.message);
