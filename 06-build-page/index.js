@@ -107,7 +107,7 @@ const pageBuild = async () => {
       let resultHTMLString = HTMLString;
       try {
         const files = await readdir(componentsPath);
-        files.forEach(async (file, idx) => {
+        for (let file of files) {
           const componentFilePath = join(componentsPath, file);
           try {
             const stats = await stat(componentFilePath);
@@ -115,14 +115,12 @@ const pageBuild = async () => {
               const templateHTMLString = await readFile(componentFilePath, 'utf-8');
               let componentTemplate = `{{${basename(componentFilePath, extname(componentFilePath))}}}`;
               resultHTMLString = resultHTMLString.replaceAll(componentTemplate, templateHTMLString);
-              if(idx === files.length - 1){
-                writeStream.write(resultHTMLString);
-              }
             }
           } catch (err) {
             console.error(err.message);
           }
-        });
+        }
+        writeStream.write(resultHTMLString);
       } catch (err) {
         console.error(err.message);
       }
@@ -134,6 +132,5 @@ const pageBuild = async () => {
 
   await createBundleHtml();
 };
-
 
 pageBuild();
