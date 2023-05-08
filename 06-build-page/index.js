@@ -1,16 +1,53 @@
-const { join, extname } = require('path');
+const { join, extname, basename, resolve } = require('path');
 const { readdir, mkdir, rm, access, stat, copyFile, readFile } = require('fs/promises');
 const { createReadStream, createWriteStream } = require('fs');
 const { EOL } = require('os');
+const { rejects } = require('assert');
 
 const newFolderPath = join(__dirname, 'project-dist');
 const folderPath = join(__dirname, 'assets');
 const folderCopyPath = join(newFolderPath, 'assets');
 const stylesFolderPath = join(__dirname, 'styles');
-const bundlePath = join(__dirname, 'project-dist', 'bundle.css');
+const bundlePath = join(__dirname, 'project-dist', 'style.css');
 const templateHtmlPath = join(__dirname, 'template.html');
+const bundleHtmlPath = join(__dirname, 'project-dist', 'index.html');
+const componentsPath = join(__dirname, 'components');
 
 const pageBuild = async () => {
+  
+  const HTMLString = await readFile(templateHtmlPath, 'utf-8');
+  let resultHTMLString = HTMLString;
+
+  const fillResultHtml = async () => {
+    try {
+      
+      try {
+        const files = await readdir(componentsPath);
+        console.log(files.length);
+        files.forEach(async (file, idx) => {
+          const componentFilePath = join(componentsPath, file);
+          try {
+            const stats = await stat(componentFilePath);
+            if(stats.isFile() && extname(componentFilePath) === '.html'){
+              const templateHTMLString = await readFile(componentFilePath, 'utf-8');
+              let componentTemplate = `{{${basename(componentFilePath, extname(componentFilePath))}}}`;
+              resultHTMLString = resultHTMLString.replaceAll(componentTemplate, templateHTMLString);
+              console.log('hello me change template ' + componentTemplate);
+            };
+          } catch (err) {
+            console.error(err.message);
+          }
+        });
+      } catch (err) {
+        console.error(err.message);
+      }
+    } catch (err) {
+      console.error(err.message);
+    }
+  };
+
+  await fillResultHtml();
+
   //create directory
   const removeDir = async () => {
     try {
@@ -97,6 +134,13 @@ const pageBuild = async () => {
   
   createBundleCSS();
 
+  const createBundleHtml = async () => {
+    const writeStream = createWriteStream(bundleHtmlPath);
+    writeStream.write(resultHTMLString);
+  };
+
+  await createBundleHtml();
 };
+
 
 pageBuild();
