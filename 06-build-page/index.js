@@ -13,38 +13,6 @@ const bundleHtmlPath = join(__dirname, 'project-dist', 'index.html');
 const componentsPath = join(__dirname, 'components');
 
 const pageBuild = async () => {
-  
-  //get filled html bundle string
-  const HTMLString = await readFile(templateHtmlPath, 'utf-8');
-  let resultHTMLString = HTMLString;
-
-  const fillResultHtml = async () => {
-    try {
-      
-      try {
-        const files = await readdir(componentsPath);
-        files.forEach(async (file) => {
-          const componentFilePath = join(componentsPath, file);
-          try {
-            const stats = await stat(componentFilePath);
-            if(stats.isFile() && extname(componentFilePath) === '.html'){
-              const templateHTMLString = await readFile(componentFilePath, 'utf-8');
-              let componentTemplate = `{{${basename(componentFilePath, extname(componentFilePath))}}}`;
-              resultHTMLString = resultHTMLString.replaceAll(componentTemplate, templateHTMLString);
-            }
-          } catch (err) {
-            console.error(err.message);
-          }
-        });
-      } catch (err) {
-        console.error(err.message);
-      }
-    } catch (err) {
-      console.error(err.message);
-    }
-  };
-
-  await fillResultHtml();
 
   //create directory
   const removeDir = async () => {
@@ -132,10 +100,36 @@ const pageBuild = async () => {
   
   createBundleCSS();
 
-  //create html bundle file
   const createBundleHtml = async () => {
     const writeStream = createWriteStream(bundleHtmlPath);
-    writeStream.write(resultHTMLString);
+    try {
+      const HTMLString = await readFile(templateHtmlPath, 'utf-8');
+      let resultHTMLString = HTMLString;
+      try {
+        const files = await readdir(componentsPath);
+        files.forEach(async (file, idx) => {
+          const componentFilePath = join(componentsPath, file);
+          try {
+            const stats = await stat(componentFilePath);
+            if(stats.isFile() && extname(componentFilePath) === '.html'){
+              const templateHTMLString = await readFile(componentFilePath, 'utf-8');
+              let componentTemplate = `{{${basename(componentFilePath, extname(componentFilePath))}}}`;
+              resultHTMLString = resultHTMLString.replaceAll(componentTemplate, templateHTMLString);
+              if(idx === files.length - 1){
+                writeStream.write(resultHTMLString);
+              }
+            }
+          } catch (err) {
+            console.error(err.message);
+          }
+        });
+      } catch (err) {
+        console.error(err.message);
+      }
+      
+    } catch (err) {
+      console.error(err.message);
+    }
   };
 
   await createBundleHtml();
