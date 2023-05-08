@@ -23,7 +23,6 @@ const pageBuild = async () => {
       
       try {
         const files = await readdir(componentsPath);
-        console.log(files.length);
         files.forEach(async (file) => {
           const componentFilePath = join(componentsPath, file);
           try {
@@ -32,7 +31,6 @@ const pageBuild = async () => {
               const templateHTMLString = await readFile(componentFilePath, 'utf-8');
               let componentTemplate = `{{${basename(componentFilePath, extname(componentFilePath))}}}`;
               resultHTMLString = resultHTMLString.replaceAll(componentTemplate, templateHTMLString);
-              console.log('hello me change template ' + componentTemplate);
             }
           } catch (err) {
             console.error(err.message);
