@@ -19,7 +19,7 @@ const createBundle = async () => {
           const readStream = createReadStream(styleFilePath);
           readStream.on('data', data => {
             writeStream.write(`${data}${EOL}`);
-          })
+          });
         }
       } catch (err) {
         console.error(err.message);

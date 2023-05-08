@@ -1,8 +1,7 @@
-const { join, extname, basename, resolve } = require('path');
+const { join, extname, basename } = require('path');
 const { readdir, mkdir, rm, access, stat, copyFile, readFile } = require('fs/promises');
 const { createReadStream, createWriteStream } = require('fs');
 const { EOL } = require('os');
-const { rejects } = require('assert');
 
 const newFolderPath = join(__dirname, 'project-dist');
 const folderPath = join(__dirname, 'assets');
@@ -15,6 +14,7 @@ const componentsPath = join(__dirname, 'components');
 
 const pageBuild = async () => {
   
+  //get filled html bundle string
   const HTMLString = await readFile(templateHtmlPath, 'utf-8');
   let resultHTMLString = HTMLString;
 
@@ -24,7 +24,7 @@ const pageBuild = async () => {
       try {
         const files = await readdir(componentsPath);
         console.log(files.length);
-        files.forEach(async (file, idx) => {
+        files.forEach(async (file) => {
           const componentFilePath = join(componentsPath, file);
           try {
             const stats = await stat(componentFilePath);
@@ -33,7 +33,7 @@ const pageBuild = async () => {
               let componentTemplate = `{{${basename(componentFilePath, extname(componentFilePath))}}}`;
               resultHTMLString = resultHTMLString.replaceAll(componentTemplate, templateHTMLString);
               console.log('hello me change template ' + componentTemplate);
-            };
+            }
           } catch (err) {
             console.error(err.message);
           }
@@ -74,7 +74,7 @@ const pageBuild = async () => {
   } catch (err) {
     //dont exist, create new dir
     await createDir(newFolderPath);
-  };
+  }
   //end of create directory
 
   //copy assets
@@ -121,7 +121,7 @@ const pageBuild = async () => {
             const readStream = createReadStream(styleFilePath);
             readStream.on('data', data => {
               writeStream.write(`${data}${EOL}`);
-            })
+            });
           }
         } catch (err) {
           console.error(err.message);
@@ -134,6 +134,7 @@ const pageBuild = async () => {
   
   createBundleCSS();
 
+  //create html bundle file
   const createBundleHtml = async () => {
     const writeStream = createWriteStream(bundleHtmlPath);
     writeStream.write(resultHTMLString);
