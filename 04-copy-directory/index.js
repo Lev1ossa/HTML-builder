@@ -12,7 +12,7 @@ const copyDir = async () => {
     } catch (err) {
       console.error(err.message);
     }
-  }
+  };
 
   const createDir = async () => {
     try {
@@ -20,7 +20,7 @@ const copyDir = async () => {
     } catch (err) {
       console.error(err.message);
     }
-  }
+  };
 
   //check folder exists
   try {
